@@ -26,19 +26,41 @@ export class Keyboard {
     document.addEventListener("keydown", this.#onKeyDown.bind(this));
     document.addEventListener("keyup", this.#onKeyUp.bind(this));
     this.#inputEl.addEventListener("input", this.#onInput.bind(this));
+    this.#keyboardEl.addEventListener("mousedown", this.#onMouseDown);
+    document.addEventListener("mouseup", this.#onMouseUp.bind(this));
+  }
+
+  #onMouseUp(event) {
+    const keyEl = event.target.closest("div.key");
+    const isActive = !!keyEl?.classList.contains("active");
+    const val = keyEl?.dataset.val;
+    if (isActive && !!val && val !== "Space" && val !== "Backspace") {
+      this.#inputEl.value += val;
+    }
+    if (isActive && val === "Space") {
+      this.#inputEl.value += " ";
+    }
+    if (isActive && val === "Backspace") {
+      this.#inputEl.value = this.#inputEl.value.slice(0, -1);
+    }
+    this.#keyboardEl.querySelector(".active")?.classList.remove("active");
+  }
+
+  #onMouseDown(event) {
+    event.target.closest("div.key")?.classList.add("active");
   }
 
   #onInput() {
     this.#inputEl.value = this.#inputEl.value.replace(
       /[ㄱ-ㅎ|ㅏ-ㅣ|가-힣]/,
-      ""
+      "",
     );
   }
 
   #onKeyDown(event) {
     this.#inputGroupEl.classList.toggle(
       "error",
-      /[ㄱ-ㅎ|ㅏ-ㅣ|가-힣]/.test(event.key)
+      /[ㄱ-ㅎ|ㅏ-ㅣ|가-힣]/.test(event.key),
     );
     this.#keyboardEl
       .querySelector(`[data-code=${event.code}]`)
@@ -54,7 +76,7 @@ export class Keyboard {
   #onChangeTheme(event) {
     document.documentElement.setAttribute(
       "theme",
-      event.target.checked ? "dark-mode" : ""
+      event.target.checked ? "dark-mode" : "",
     );
   }
 
